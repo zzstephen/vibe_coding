@@ -2,12 +2,66 @@ import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
 import plotly.express as px
-
+import textwrap
+import matplotlib.pyplot as plt
+import textwrap
 
 
 class data_visualization:
     def __init__(self, data=None):
         self.data = data
+
+
+    @staticmethod
+    def bar_table(df, title, bar_scale=1.8, max_bar_width=0.75, fig_width=14, fig_height=8):
+        """
+        Creates a visual data table with micro-bars and numeric annotations.
+
+        Args:
+            df (pd.DataFrame): Data where index is row labels and columns are groups.
+            title (str): The chart title.
+            colors (list, optional): List of hex colors for columns.
+            bar_scale (float): Scaling factor for bar width relative to cell.
+            max_bar_width (float): Ceiling for bar width to prevent overlap.
+            fig_width (float): Width of the final figure in inches.
+            fig_height (float): Height of the final figure in inches.
+        """
+        rows = list(df.index)
+        cols = list(df.columns)
+        num_rows = len(rows)
+
+        # Initialize plot with user-defined dimensions
+        fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+
+        # 1. Plot Headers
+        for j, name in enumerate(cols):
+            wrapped_name = "\n".join(textwrap.wrap(name, width=12))
+            ax.text(j + 0.5, num_rows + 0.5, wrapped_name,
+                    ha='center', va='bottom', fontsize=10, fontweight='bold', linespacing=1.2)
+
+        # 2. Plot Rows
+        for i, row_label in enumerate(reversed(rows)):
+            ax.text(-0.1, i + 0.25, row_label, ha='right', va='center', fontsize=10)
+
+            for j, col_name in enumerate(cols):
+                val = df.loc[row_label, col_name]
+                color = colors[j % len(colors)] if colors else '#3498db'
+
+                bar_width = min((val / 100) * bar_scale, max_bar_width)
+                rect = plt.Rectangle((j + 0.05, i + 0.1), bar_width, 0.3, color=color, alpha=0.9)
+                ax.add_patch(rect)
+
+                ax.text(j + 0.1 + bar_width, i + 0.25, f"{val:g}", ha='left', va='center', fontsize=9)
+
+        # 3. Aesthetics
+        ax.set_xlim(-2.5, len(cols))
+        ax.set_ylim(-0.5, num_rows + 2)
+        ax.set_aspect('auto')  # Allows the dimensions to stretch the content
+        ax.axis('off')
+        plt.title(title, loc='left', fontsize=13, pad=40, fontweight='bold', color='#333333')
+
+        plt.tight_layout()
+        plt.show()
 
     @staticmethod
     def violin_plot(df, value_col, category_col, title="Distribution Analysis"):
