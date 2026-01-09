@@ -13,55 +13,41 @@ class data_visualization:
 
 
     @staticmethod
-    def bar_table(df, title, bar_scale=1.8, max_bar_width=0.75, fig_width=14, fig_height=8):
-        """
-        Creates a visual data table with micro-bars and numeric annotations.
+    def bar_table(df:pd.DataFrame, title:str=):
+        num_rows = len(df)
+        num_cols = len(df.columns)
 
-        Args:
-            df (pd.DataFrame): Data where index is row labels and columns are groups.
-            title (str): The chart title.
-            colors (list, optional): List of hex colors for columns.
-            bar_scale (float): Scaling factor for bar width relative to cell.
-            max_bar_width (float): Ceiling for bar width to prevent overlap.
-            fig_width (float): Width of the final figure in inches.
-            fig_height (float): Height of the final figure in inches.
-        """
-        rows = list(df.index)
-        cols = list(df.columns)
-        num_rows = len(rows)
+        # Create a grid of subplots (1 row of plots per column of data)
+        fig, axes = plt.subplots(nrows=1, ncols=num_cols,
+                                 figsize=(num_cols * 3, num_rows * 0.5),
+                                 sharey=True)
 
-        # Initialize plot with user-defined dimensions
-        fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+        # If there's only one column, axes isn't a list, so we wrap it
+        if num_cols == 1: axes = [axes]
 
-        # 1. Plot Headers
-        for j, name in enumerate(cols):
-            wrapped_name = "\n".join(textwrap.wrap(name, width=12))
-            ax.text(j + 0.5, num_rows + 0.5, wrapped_name,
-                    ha='center', va='bottom', fontsize=10, fontweight='bold', linespacing=1.2)
+        for i, col in enumerate(df.columns):
+            ax = axes[i]
 
-        # 2. Plot Rows
-        for i, row_label in enumerate(reversed(rows)):
-            ax.text(-0.1, i + 0.25, row_label, ha='right', va='center', fontsize=10)
+            # Use the standard horizontal bar function
+            bars = ax.barh(df.index, df[col], color=f'C{i}', alpha=0.7, height=0.6)
 
-            for j, col_name in enumerate(cols):
-                val = df.loc[row_label, col_name]
-                color = colors[j % len(colors)] if colors else '#3498db'
+            # Standard functions to add labels and titles
+            ax.bar_label(bars, padding=3, fontsize=9)
+            ax.set_title(col, fontweight='bold', fontsize=10)
 
-                bar_width = min((val / 100) * bar_scale, max_bar_width)
-                rect = plt.Rectangle((j + 0.05, i + 0.1), bar_width, 0.3, color=color, alpha=0.9)
-                ax.add_patch(rect)
+            # Standard axis cleanup
+            ax.spines[['top', 'right', 'bottom']].set_visible(False)
+            ax.set_xticks([])  # Hide x-axis scale for the 'table' look
 
-                ax.text(j + 0.1 + bar_width, i + 0.25, f"{val:g}", ha='left', va='center', fontsize=9)
+            # Only keep y-labels for the first column
+            if i > 0:
+                ax.tick_params(left=False)
 
-        # 3. Aesthetics
-        ax.set_xlim(-2.5, len(cols))
-        ax.set_ylim(-0.5, num_rows + 2)
-        ax.set_aspect('auto')  # Allows the dimensions to stretch the content
-        ax.axis('off')
-        plt.title(title, loc='left', fontsize=13, pad=40, fontweight='bold', color='#333333')
-
+        plt.suptitle(title, fontsize=14, fontweight='bold', y=1.05)
         plt.tight_layout()
         plt.show()
+
+
 
     @staticmethod
     def violin_plot(df, value_col, category_col, title="Distribution Analysis"):
