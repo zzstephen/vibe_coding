@@ -23,6 +23,9 @@ full_marker_list = \
     "bowtie", "bowtie-open", "asterisk", "hash", "y-up", "y-down", "y-left", "y-right",
     "line-ew", "line-ns", "line-ne", "line-nw"]
 
+
+
+
 def get_unique_colors(n):
     """
     Returns a list of n visually distinct colors suitable for Plotly.
@@ -112,7 +115,7 @@ class data_visualization:
             legend_title=category_col,
             template="plotly_white",
             width=900,
-            height=max(height, n * 100)
+            height=max(height, n * 60)
         )
         return fig
 
