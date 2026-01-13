@@ -59,8 +59,17 @@ def get_unique_colors(n):
 
 
 class data_visualization:
-    def __init__(self, data=None):
-        self.data = data
+
+    @staticmethod
+    def normalized_stacked_area_plot(df, x_var: str, y_vars: list = []):
+        keep_vars = [x_var] + y_vars
+        df_plot = df[keep_vars].melt(id_vars=[x_var], var_name='Category', value_name='Value')
+        fig = px.area(df_plot, x=x_var, y='Value', color='Category', title="Interactive Stacked Area Plot with Plotly")
+        fig.update_traces(
+            line=dict(width=3),
+            opacity=0.6)
+        return fig
+
 
     @staticmethod
     def scatter_plot_by_category(df, x_col, y_col, category_col, width=900, height=600,
